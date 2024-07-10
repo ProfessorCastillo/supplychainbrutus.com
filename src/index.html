@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supply Chain Brutus</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #ba0c2f;
+            --secondary-color: #3f4443;
+            --background-color: #a7b1b7;
+        }
+        html {
+            font-size: 16px;
+        }
+        body {
+            font-family: 'Noto Sans', Arial, sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-size: clamp(14px, 2.5vw, 18px);
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 5vh 5vw;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: var(--primary-color);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 2vh;
+            font-weight: 700;
+        }
+        p {
+            color: var(--secondary-color);
+            margin-bottom: 2vh;
+        }
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        a:hover, a:focus {
+            color: #4a0513;
+            text-decoration: underline;
+        }
+        .avatar {
+            width: clamp(80px, 20vw, 150px);
+            height: auto;
+            border-radius: 50%;
+            margin-bottom: 2vh;
+        }
+        #chatbox {
+            height: 30vh;
+            border: 1px solid #ccc;
+            overflow-y: auto;
+            margin-bottom: 2vh;
+            padding: 2vh 2vw;
+            text-align: left;
+            scroll-behavior: smooth;
+        }
+        #user-input {
+            width: 100%;
+            padding: 1.5vh 2vw;
+            margin-bottom: 2vh;
+            resize: vertical;
+            min-height: 50px;
+            box-sizing: border-box;
+            font-size: inherit;
+        }
+        button {
+            padding: 1.5vh 2vw;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: inherit;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 2vh;
+            transition: background-color 0.3s ease;
+        }
+        button:hover, button:focus {
+            background-color: #4a0513;
+        }
+        .loading {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2vh auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        pre {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1vh 1vw;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        @media (min-width: 768px) {
+            .container {
+                padding: 40px;
+            }
+            button {
+                width: auto;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <img src="path/to/your/avatar.png" alt="Hi, I'm Supply Chain Brutus!" class="avatar">
+        <h1>Welcome!</h1>
+        <p>I'm Supply Chain Brutus, your friendly AI guide to all things supply chain. I'm still under development, but you can chat with me below!</p>
+        <div id="chatbox"></div>
+        <textarea id="user-input" placeholder="Type your message and press Enter or tap Send..." aria-label="Type your message"></textarea>
+        <button onclick="sendMessage()">Send</button>
+        <div class="loading" id="loading-indicator"></div>
+        <p>For inquiries, contact my Professor at <a href="mailto:example@example.com">example@example.com</a>.</p>
+    </div>
+
+    <script>
+        let conversationHistory = [];
+        const API_ENDPOINT = 'YOUR_API_ENDPOINT_HERE';
+
+        function formatMessage(message) {
+            // Note: Ensure proper input sanitization and validation on the server side
+            // The client-side formatting here is for display purposes only
+            message = message.replace(/\n/g, '<br>');
+            
+            message = message.replace(/```([\s\S]*?)```/g, function(match, code) {
+                code = code.replace(/^\n/, '');
+                code = code.trim();
+                return `<pre><code>${code}</code></pre>`;
+            });
+            
+            return message;
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const chatbox = document.getElementById('chatbox');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            
+            if (userInput.value.trim() === '') return;
+
+            const userMessage = userInput.value;
+
+            userInput.value = '';
+
+            chatbox.innerHTML += `<p><strong>You:</strong> ${formatMessage(userMessage)}</p>`;
+            
+            conversationHistory.push({
+                role: "user",
+                content: userMessage
+            });
+
+            loadingIndicator.style.display = 'block';
+
+            try {
+                // Note: Ensure CORS is properly configured on the server side
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: "YOUR_MODEL_VERSION_HERE",
+                        max_tokens: 1000,
+                        temperature: 0,
+                        messages: conversationHistory
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.content) {
+                    const formattedContent = formatMessage(data.content);
+                    chatbox.innerHTML += `<p><strong>Supply Chain Brutus:</strong> ${formattedContent}</p>`;
+                    
+                    conversationHistory.push({
+                        role: "assistant",
+                        content: data.content
+                    });
+
+                    document.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightBlock(block);
+                    });
+                } else {
+                    chatbox.innerHTML += `<p><strong>Error:</strong> An unexpected error occurred. Please try again later.</p>`;
+                }
+            } catch (error) {
+                chatbox.innerHTML += `<p><strong>Error:</strong> An unexpected error occurred. Please try again later.</p>`;
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+            
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        document.getElementById('user-input').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.querySelector('button').addEventListener('click', sendMessage);
+
+        // Improved keyboard accessibility
+        document.querySelector('button').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                this.click();
+            }
+        });
+    </script>
+</body>
+</html>
